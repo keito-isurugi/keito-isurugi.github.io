@@ -2,12 +2,14 @@
 
 import Head from 'next/head'
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { FaGithub, FaLinkedin, FaTwitter } from 'react-icons/fa'
+import { motion, AnimatePresence } from 'framer-motion'
+import { FaGithub, FaLinkedin, FaTwitter, FaArrowUp } from 'react-icons/fa'
 import { SiJavascript, SiReact, SiNextdotjs, SiTailwindcss, SiTypescript, SiNodedotjs } from 'react-icons/si'
+import Link from 'next/link'
 
 export default function Home() {
   const [darkMode, setDarkMode] = useState(false)
+  const [showScrollTop, setShowScrollTop] = useState(false)
 
   useEffect(() => {
     if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -17,6 +19,13 @@ export default function Home() {
       setDarkMode(false)
       document.documentElement.classList.remove('dark')
     }
+
+    const handleScroll = () => {
+        setShowScrollTop(window.pageYOffset > 300)
+    }
+  
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   const toggleDarkMode = () => {
@@ -28,6 +37,13 @@ export default function Home() {
       localStorage.theme = 'dark'
       document.documentElement.classList.add('dark')
     }
+  }
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    })
   }
 
   const skills = [
@@ -46,16 +62,21 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="flex justify-end mb-4">
-          <button
-            onClick={toggleDarkMode}
-            className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-md transition-colors duration-300"
-          >
-            {darkMode ? '🌞 ライトモード' : '🌙 ダークモード'}
-          </button>
-        </div>
+        <header className="bg-white dark:bg-gray-800 shadow-md">
+            <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+                <Link href="/" className="text-2xl font-bold text-gray-900 dark:text-white hover:text-blue-500 dark:hover:text-blue-400 transition-colors duration-300">
+                    TOP
+                </Link>
+                <button
+                    onClick={toggleDarkMode}
+                    className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-md transition-colors duration-300"
+                >
+                    {darkMode ? '🌞 ライトモード' : '🌙 ダークモード'}
+                </button>
+            </div>
+        </header>
 
+      <main className="container mx-auto px-4 py-8">
         <motion.h1 
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
@@ -128,6 +149,22 @@ export default function Home() {
           </div>
         </motion.div>
       </main>
+
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.2 }}
+            onClick={scrollToTop}
+            className="fixed bottom-4 right-4 bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full shadow-lg transition-colors duration-300"
+            aria-label="トップに戻る"
+          >
+            <FaArrowUp size={24} />
+          </motion.button>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
